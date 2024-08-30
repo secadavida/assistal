@@ -18,7 +18,7 @@ class ListaAsistencia:
             return
         
         # Funcion lambda para ordenar por apellido
-        self.dataframe = self.dataframe.sort_values(by='Nombre', key=lambda x: x.str.split().str[-1])
+        self.dataframe = self.dataframe.sort_values(by='Nombre', key=lambda x: x.str.split().str[0])
 
         dias_semana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
         for dia in dias_semana:
