@@ -18,7 +18,7 @@ $ deactivate # after finishing
 **Running**:
 
 ```sh
-$ python ./src/main.py
+$ python -m assistal
 ```
 
 **Adding dependencies**:
