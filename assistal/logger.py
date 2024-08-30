@@ -2,11 +2,8 @@
 
 import assistal.config as C
 
-import tempfile
 import os
 import logging
-
-LOG_FILE_PATH = ""
 
 logger = logging.getLogger(__name__)
 
@@ -21,26 +18,25 @@ log_methods = {
 
 
 def setup():
-    with tempfile.TemporaryDirectory() as temp_dir:
-        print(f"Temporary directory path: {temp_dir}")
 
-        LOG_FILE_PATH = os.path.join(temp_dir, C.LOG_FILE_NAME)
+    if os.path.exists(C.LOG_PATH):
+        os.remove(C.LOG_PATH)
 
-        # Check if the file exists
-        if os.path.exists(LOG_FILE_PATH):
-            os.remove(LOG_FILE_PATH)
-        
-        # Create a new file
-        with open(LOG_FILE_PATH, 'w') as log_file:
-            log_file.write('[Assistal: process log]')
+    with open(C.LOG_PATH, 'w') as log_file:
+        log_file.write('[Assistal: process log]\n\n')
+
+    handlers = []
+
+    if C.VERBOSE:
+        handlers.append(logging.StreamHandler())
+
+    handlers.append(logging.FileHandler(C.LOG_PATH))
 
     logging.basicConfig(
         level=logging.DEBUG,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            # logging.StreamHandler
-            logging.FileHandler(LOG_FILE_PATH)
-        ]
+        format='[%(levelname)s] (%(asctime)s): %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        handlers = handlers
     )
 
 def log(level: str, message: str) -> bool:

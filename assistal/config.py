@@ -1,6 +1,7 @@
 """Constants"""
 
 import os
+import tempfile
 from datetime import datetime
 
 
@@ -20,6 +21,7 @@ def _join(*paths) -> str:
 # meta
 VERBOSE = False
 LOG_FILE_NAME = "assistal-" + datetime.now().strftime("%m-%d") + ".log"
+LOG_PATH = os.path.join(tempfile.gettempdir(), LOG_FILE_NAME)
 
 # app logic
 DATA_DIR = _get_dir('..', 'data')
