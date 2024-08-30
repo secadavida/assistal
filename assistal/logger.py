@@ -15,8 +15,6 @@ log_methods = {
     'critical': logger.critical
 }
 
-
-
 def setup():
 
     if os.path.exists(C.LOG_PATH):
