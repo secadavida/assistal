@@ -1,3 +1,14 @@
+import pyfiglet
+
+FIGLET = pyfiglet.Figlet(font='slant')
+
+def print_text_ascii(message: str) -> None:
+    
+    print(
+        FIGLET.renderText(" ".join(message))
+    )
+
+
 def option_one():
     print("Option One Selected")
 
@@ -12,22 +23,25 @@ def exit_menu():
     exit()
 
 MENU_OPTIONS = {
-    "Descargar documento con las fichas": option_one,
-    "Gestionar las fichas": option_two,
-    "Generar asistencia": option_three,
+    "⬇️  Descargar documento con las fichas": option_one,
+    "💻  Gestionar las fichas": option_two,
+    "📋  Generar asistencia": option_three,
 }
 
 def display_menu(menu):
-    print("======== 📋 Assistal Menu 📋 ========\n")
+
+    print_text_ascii("Assistal")
+
     for index, key in enumerate(menu.keys(), start=1):
         print(f"{index}. {key}")
-    print("0. Salir")
+    print("0. ⬅️  Salir")
 
 def _run_menu(menu):
+
     while True:
         display_menu(menu)
         print()
-        choice = input("👉 ")
+        choice = input(" 👉  ")
         
         if choice == "0":
             exit_menu()
