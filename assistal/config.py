@@ -19,6 +19,7 @@ def _join(*paths) -> str:
 
 
 # meta
+GENERATE_LOGS = True
 VERBOSE = False
 LOG_FILE_NAME = "assistal-" + datetime.now().strftime("%m-%d") + ".log"
 LOG_PATH = os.path.join(tempfile.gettempdir(), LOG_FILE_NAME)
