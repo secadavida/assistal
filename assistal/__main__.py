@@ -1,4 +1,3 @@
-def main():
-    print("Hello, World!")
+from assistal.main import main
 
 main()
