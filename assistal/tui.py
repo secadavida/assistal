@@ -1,63 +1,54 @@
-import pyfiglet
+"""TUI"""
 
-FIGLET_BIG = pyfiglet.Figlet(font='slant')
-FIGLET_MINI = pyfiglet.Figlet(font='mini')
+import assistal.fetcher as fetcher
+import assistal.config as C
 
-def print_text_ascii(message: str, use_mini: bool = True) -> None:
+from assistal.classes.Estudiante import Estudiante
+# from assistal.ui import commons
+import assistal.ui.commons as commons
+import assistal.menus.manage_students as _manage_students
 
-    message = " ".join(message)
-
-    text = FIGLET_MINI.renderText(message) if use_mini else FIGLET_BIG.renderText(message)
-    
-    print(text)
-
+import assistal.ui.utils as utils
 
 def download_document():
-    print_text_ascii("Descargar documento")
+    utils.print_text_ascii("Descargar documento")
+
+    ok = fetcher.download_google_sheet(C.DOCUMENTO_CON_FICHAS, "datos.xlsx")
     
+    if ok:
+        print("se descargo el archivo correctamente")
+    else:
+        print("no se pudo descargar el archivo por falta de credenciales")
+    
+def manage_students():
 
-def option_two():
-    print("Option Two Selected")
+    utils.print_text_ascii("Administrar estudiantes")
 
-def option_three():
-    print("Option Three Selected")
+    Estudiante.crear_archivo(C.ESTUDIANTES_A) 
+    _manage_students.run()
 
-def exit_menu():
-    print("Exiting menu.")
-    exit()
+def manage_fichas():
+
+    utils.print_text_ascii("Gestionar las fichas")
+
+def generate_assistance():
+
+    utils.print_text_ascii("Generar asistencia")
+
+    name = input("Nombre: ")
+    id = input("ID: ")
+
+    student = Estudiante(name, id)
+
+    student.agregar_a_excel(C.DOCUMENTO_CON_FICHAS)
+
 
 MENU_OPTIONS = {
     "⬇️  Descargar documento con las fichas": download_document,
-    "💻  Gestionar las fichas": option_two,
-    "📋  Generar asistencia": option_three,
+    "📋  Administrar estudiantes": manage_students,
+    "💻  Gestionar las fichas": manage_fichas,
+    "📋  Generar asistencia": generate_assistance,
 }
 
-def display_menu(menu):
-
-    print_text_ascii("Assistal", False)
-
-    for index, key in enumerate(menu.keys(), start=1):
-        print(f"{index}. {key}")
-    print("0. ⬅️  Salir")
-
-def _run_menu(menu):
-
-    while True:
-        display_menu(menu)
-        print()
-        choice = input(" 👉  ")
-        
-        if choice == "0":
-            exit_menu()
-        
-        try:
-            choice_index = int(choice) - 1
-            if choice_index in range(len(menu)):
-                list(menu.values())[choice_index]()
-            else:
-                print("Invalid selection. Please try again.")
-        except ValueError:
-            print("Invalid selection. Please enter a number.")
-
-def run_menu():
-    _run_menu(MENU_OPTIONS)
+def run():
+    commons.run_menu(MENU_OPTIONS, "Assistal", small_banner=False, do_exit=True)

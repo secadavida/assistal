@@ -1,51 +1,39 @@
 """Fetch files from Google Drive"""
 
-import sys
 import requests
+import re
 
+def extract_file_id_from_url(url):
+    """
+    Extracts the file ID from a Google Sheets URL.
 
-def download_file_from_google_drive(file_id, destination):
-    URL = "https://docs.google.com/uc?export=download&confirm=1"
-
-    session = requests.Session()
-
-    response = session.get(URL, params={"id": file_id}, stream=True)
-    token = get_confirm_token(response)
-
-    if token:
-        params = {"id": file_id, "confirm": token}
-        response = session.get(URL, params=params, stream=True)
-
-    save_response_content(response, destination)
-
-
-def get_confirm_token(response):
-    for key, value in response.cookies.items():
-        if key.startswith("download_warning"):
-            return value
-
+    :param url: The Google Sheets URL.
+    :return: The file ID extracted from the URL.
+    """
+    # Regular expression to find file ID in Google Sheets URL
+    match = re.search(r'/d/([a-zA-Z0-9_-]+)', url)
+    if match:
+        return match.group(1)
     return None
 
+def download_google_sheet(url, destination):
+    # Extract the file ID from the URL
+    file_id = extract_file_id_from_url(url)
+    if not file_id:
+        print("Invalid URL or unable to extract file ID.")
+        return
+    
+    # Construct the URL to export the Google Sheets file as CSV
+    export_url = f"https://docs.google.com/spreadsheets/d/{file_id}/export?format=xlsx"
 
-def save_response_content(response, destination):
-    CHUNK_SIZE = 32768
+    # Send a request to get the file
+    response = requests.get(export_url, stream=True)
 
-    with open(destination, "wb") as f:
-        for chunk in response.iter_content(CHUNK_SIZE):
-            if chunk:  # filter out keep-alive new chunks
-                f.write(chunk)
-
-
-def main():
-    if len(sys.argv) >= 3:
-        file_id = sys.argv[1]
-        destination = sys.argv[2]
-    else:
-        file_id = "TAKE_ID_FROM_SHAREABLE_LINK"
-        destination = "DESTINATION_FILE_ON_YOUR_DISK"
-    print(f"dowload {file_id} to {destination}")
-    download_file_from_google_drive(file_id, destination)
-
-
-if __name__ == "__main__":
-    main()
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Write the file to the destination
+        with open(destination, "wb") as file:
+            for chunk in response.iter_content(chunk_size=8192):
+                file.write(chunk)
+        return True
+    return False

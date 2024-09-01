@@ -9,4 +9,4 @@ def main():
     logger.setup()
     logger.log("info", "starting Assistal")
 
-    tui.run_menu()
+    tui.run()
