@@ -22,7 +22,6 @@ class SizeLimitedFileHandler(logging.FileHandler):
         self.max_size_bytes = max_size_mb * 1024 * 1024  # Convert MB to bytes
 
     def emit(self, record):
-        # Check file size
         if os.path.exists(self.baseFilename) and os.path.getsize(self.baseFilename) >= self.max_size_bytes:
             return
         
@@ -79,6 +78,8 @@ def _create_log_dir_file():
 
 
 def setup():
+
+    """Creates the logger and registers its handlers"""
 
     FINAL_LOG_FILE = _create_log_dir_file()
 
