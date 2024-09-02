@@ -30,4 +30,4 @@ MAX_LOG_SIZE_BYTES = 5
 RUNTIME_DIR = _get_dir('..', 'data')
 RUNTIME_GROUPS_DIR = _join(RUNTIME_DIR, "groups")
 ESTUDIANTES_A = _join(RUNTIME_GROUPS_DIR, "A.xlsx")
-DOCUMENTO_CON_FICHAS = 'https://docs.google.com/spreadsheets/d/1106U6_pnmgBm06o8Am0AHZNP4NYV2Eb9bakct6bec0o/edit?usp=drive_link'
+CARDS_DOCUMENT = 'https://docs.google.com/spreadsheets/d/1106U6_pnmgBm06o8Am0AHZNP4NYV2Eb9bakct6bec0o/edit?usp=drive_link'
