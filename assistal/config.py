@@ -20,6 +20,7 @@ _join = os.path.join
 GENERATE_LOGS = True
 VERBOSE = False
 
+# runtime
 LOG_FILE_NAME =  "assistal-" + datetime.now().strftime("%m-%d") + ".log"
 LOG_PATH = _join(tempfile.gettempdir(), "assistal_logs")
 MAX_LOGS_PER_DAY = 3

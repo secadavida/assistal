@@ -32,6 +32,9 @@ def _create_log_dir_file():
 
     """Creates log directory and assings the current log's filename"""
 
+    if not C.GENERATE_LOGS:
+        return ""
+
     log_file_number = 1
     existed = True
 
@@ -79,20 +82,21 @@ def _create_log_dir_file():
 
 
 def setup():
-
     """Creates the logger and registers its handlers"""
 
     FINAL_LOG_FILE = _create_log_dir_file()
-
-    with open(FINAL_LOG_FILE, 'w') as log_file:
-        log_file.write(f"[Assistal: process log]\n\n")
 
     handlers = []
 
     if C.VERBOSE:
         handlers.append(logging.StreamHandler())
 
-    handlers.append(SizeLimitedFileHandler(FINAL_LOG_FILE, C.MAX_LOG_SIZE_BYTES))
+    if C.GENERATE_LOGS:
+
+        with open(FINAL_LOG_FILE, 'w') as log_file:
+            log_file.write(f"[Assistal: process log]\n\n")
+
+        handlers.append(SizeLimitedFileHandler(FINAL_LOG_FILE, C.MAX_LOG_SIZE_BYTES))
 
     logging.basicConfig(
         level=logging.DEBUG,
@@ -101,9 +105,16 @@ def setup():
         handlers = handlers
     )
 
+
 def log(level: str, message: str) -> None:
 
     log_method = log_methods.get(level.lower())
 
     if log_method:
         log_method(message)
+
+# if not C.GENERATE_LOGS and not C.VERBOSE:
+#     def _log(level, message):
+#         pass
+#
+#     log = _log
