@@ -17,7 +17,7 @@ def generate_assistance():
 
 MENU_OPTIONS = {
     "⬇️  Descargar documento con las fichas": download_document,
-    "📋  Gestionar estudiantes": manage_students,
+    "🧒  Gestionar estudiantes": manage_students,
     "💻  Gestionar las fichas": manage_cards,
     "📋  Generar asistencia": generate_assistance,
 }
