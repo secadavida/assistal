@@ -1,4 +1,10 @@
-"""Fetch files from Google Drive"""
+"""Fetch files from Google Drive
+    
+Caveats:
+ - It can only handle URLs that "Anyone can access", other than that will require
+    the use of credentials.json from Google's API from the file's owner
+ - Only supports the file formats specified under $FILE_FORMATS
+"""
 
 from assistal.logger import log
 
