@@ -11,6 +11,7 @@ from assistal.logger import log
 import requests
 import re
 
+
 FILE_FORMATS = {
     "spreadsheets": "xlsx",
     "document": "docx"
