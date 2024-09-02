@@ -13,16 +13,17 @@ def _get_dir(*relative_path: str) -> str:
         os.path.join(_BASE_DIR, *relative_path)
     )
 
-def _join(*paths: str) -> str:
-    
-    return os.path.join(*paths)
+_join = os.path.join
 
 
 # meta
 GENERATE_LOGS = True
 VERBOSE = False
-LOG_FILE_NAME = "assistal-" + datetime.now().strftime("%m-%d") + ".log"
-LOG_PATH = os.path.join(tempfile.gettempdir(), LOG_FILE_NAME)
+
+LOG_FILE_NAME =  "assistal-" + datetime.now().strftime("%m-%d") + ".log"
+LOG_PATH = _join(tempfile.gettempdir(), "assistal_logs")
+MAX_LOGS_PER_DAY = 3
+MAX_LOG_SIZE_BYTES = 5
 
 # app logic
 DATA_DIR = _get_dir('..', 'data')
