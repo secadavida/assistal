@@ -7,4 +7,4 @@ import assistal.logger as logger
 def main():
 
     logger.setup()
-    logger.log("info", "starting Assistal")
+    logger.log("info", "inicializando Assistal")

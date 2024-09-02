@@ -100,12 +100,9 @@ def setup():
         handlers = handlers
     )
 
-def log(level: str, message: str) -> bool:
+def log(level: str, message: str) -> None:
 
     log_method = log_methods.get(level.lower())
 
     if log_method:
         log_method(message)
-        return True
-
-    return False
