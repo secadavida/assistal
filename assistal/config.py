@@ -5,16 +5,7 @@ import tempfile
 from datetime import datetime
 
 
-_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-def _get_dir(*relative_path: str) -> str:
-
-    return os.path.abspath(
-        os.path.join(_BASE_DIR, *relative_path)
-    )
-
 _join = os.path.join
-
 
 # meta
 GENERATE_LOGS = True
@@ -27,7 +18,9 @@ MAX_LOGS_PER_DAY = 3
 MAX_LOG_SIZE_BYTES = 5
 
 # app logic
-RUNTIME_DIR = _get_dir('..', 'data')
+_APP_ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+RUNTIME_DIR = _join(_APP_ROOT_DIR, "runtime")
 RUNTIME_GROUPS_DIR = _join(RUNTIME_DIR, "groups")
-ESTUDIANTES_A = _join(RUNTIME_GROUPS_DIR, "A.xlsx")
-CARDS_DOCUMENT = 'https://docs.google.com/spreadsheets/d/1106U6_pnmgBm06o8Am0AHZNP4NYV2Eb9bakct6bec0o/edit?usp=drive_link'
+RUNTIME_ASSISTANCE_FILE = _join(RUNTIME_DIR, "asistencia.xlsx")
+GOOGLE_DRIVE_CARDS_DOCUMENT = ""
