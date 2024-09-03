@@ -6,9 +6,9 @@ def parse_arguments() -> None:
 
     parser = argparse.ArgumentParser(description="CLI parser for Assistal")
 
-    parser.add_argument("-v", "--verbose", action='store_true', help="Increase output verbosity")
-    parser.add_argument("-n", "--no-logs", action='store_true', help="Do not generate log files")
-    parser.add_argument("-f", "--fichas", type=str, default="", help="Google Drive url for the cards file")
+    parser.add_argument("-v", "--verbose", action='store_true', help="mostrar los logs en pantalla")
+    parser.add_argument("-n", "--no-logs", action='store_true', help="no generar logs (los cuales se guardan el directorio temporal del sistema operativo)")
+    parser.add_argument("-f", "--fichas", type=str, default="", help="URL de Google Drive con el archivo donde se guardan las fichas")
 
     args = parser.parse_args()
 
