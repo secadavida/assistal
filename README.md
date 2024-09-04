@@ -6,6 +6,10 @@ Este proyecto tiene como objetivo desarrollar un **Sistema de Gestión de Asiste
 
 El sistema está diseñado para manejar eficientemente la asistencia de los estudiantes mediante la digitalización del proceso de justificación de inasistencias y el seguimiento de la asistencia a lo largo de los periodos académicos. Además, se busca integrar la información de manera que sea fácilmente accesible y manipulable por parte del personal administrativo y docente.
 
+## Documentacion
+
+La documentacion puede ser encontrada en el directorio de (Docs)[docs/index.md]
+
 ## Funcionalidades Principales
 
 ### Registro de Asistencia
