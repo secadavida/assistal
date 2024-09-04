@@ -8,7 +8,7 @@ El sistema está diseñado para manejar eficientemente la asistencia de los estu
 
 ## Documentacion
 
-La documentacion puede ser encontrada en el directorio de (Docs)[docs/index.md]
+La documentacion puede ser encontrada en el directorio de [Docs](docs/index.md)
 
 ## Funcionalidades Principales
 
