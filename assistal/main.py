@@ -26,4 +26,8 @@ def main():
 
     create_runtime()
 
-    tui.run()
+    try:
+        tui.run()
+    except KeyboardInterrupt:
+        print()
+        exit()

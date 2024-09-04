@@ -6,10 +6,13 @@ Caveats:
  - Only supports the file formats specified under $FILE_FORMATS
 """
 
-from assistal.logger import log
+from assistal.logger import log, plog
+from assistal.ui import commons
 
+from tqdm import tqdm
 import requests
 import re
+import os
 
 
 FILE_FORMATS = {
@@ -35,7 +38,7 @@ def extract_file_properties(url):
 
     return *properties,
 
-def download_google_sheet(url: str, destination: str) -> bool:
+def download_google_drive_file(url: str, destination: str) -> bool:
 
     file_type, file_id = extract_file_properties(url)
 
@@ -56,18 +59,43 @@ def download_google_sheet(url: str, destination: str) -> bool:
     # construct the URL to export the Google Sheets file as CSV
     export_url = f"https://docs.google.com/{file_type}/d/{file_id}/export?format={export_format}"
 
-    # send a request to get the file
+    log("info", "revisando la disponibilidad del archivo")
+
+    # send a GET request for the file
     response = requests.get(export_url, stream=True)
 
     # check if the request was successful
     if response.status_code == 200:
-        # Write the file to the destination
-        with open(destination, "wb") as file:
-            for chunk in response.iter_content(chunk_size=8192):
-                file.write(chunk)
         
-        log("info", f"se descargo el archivo: {url}")
+        log("info", f"el archivo {url} se encuentra disponible para descargar")
+
+        if os.path.isfile(destination):
+            plog("warning", f"ya hay un archivo presente en '{destination}'")
+            responses = commons.show_form({"Deseas reemplazarlo?": ["si", "no"]})
+            if responses[0] == "no":
+                plog("info", f"el archivo en '{destination}' fue dejado intacto")
+                return False
+
+        plog("info", f"se reemplazara el archivo en '{destination}'")
+
+        # Total file size (in bytes) - You may need to get this from response.headers['Content-Length']
+        total_size = int(response.headers.get('Content-Length', 0))
+
+        # Create a tqdm progress bar
+        progress_bar = tqdm(total=total_size, unit='B', unit_scale=True, unit_divisor=1024)
+
+        # Write the content to a file
+        with open(destination, 'wb') as file:
+            for chunk in response.iter_content(chunk_size=1024):
+                if chunk:
+                    file.write(chunk)
+                    progress_bar.update(len(chunk))
+
+        # Close the progress bar
+        progress_bar.close()
+        
+        plog("info", f"se descargo el archivo: {url}")
         return True
 
-    log("error", f"no se pudo descargar el archivo: {url}. Estatus: {str(response.status_code)}")
+    plog("error", f"no se pudo descargar el archivo: {url}. Estatus: {str(response.status_code)}")
     return False

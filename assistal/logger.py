@@ -102,7 +102,7 @@ def setup():
         level=logging.DEBUG,
         format='[%(levelname)s] (%(asctime)s): %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S',
-        handlers = handlers
+        handlers = handlers # NOTE: if handlers = [], then it will print to STDOUT
     )
 
 
@@ -113,8 +113,8 @@ def log(level: str, message: str) -> None:
     if log_method:
         log_method(message)
 
-# if not C.GENERATE_LOGS and not C.VERBOSE:
-#     def _log(level, message):
-#         pass
-#
-#     log = _log
+def plog(level: str, message: str) -> None:
+
+    log(level, message)
+    if C.GENERATE_LOGS and not C.VERBOSE:
+        print(message)
