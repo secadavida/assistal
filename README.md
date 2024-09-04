@@ -1,4 +1,4 @@
-# Sistema de Gestión de Asistencia Escolar
+# 📋 Assistal: Sistema de Gestión de Asistencia Escolar
 
 ## Descripción General
 
