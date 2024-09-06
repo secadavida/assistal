@@ -1,10 +1,12 @@
 # Contributing
 
+## Development
+
 **Prerequisites**:
 
 ```sh
-$ source ./venv/bin/activate # linux/MacOS
-$ venv\Scripts\activate      # windows
+$ source ./venv/bin/activate # Linux/MacOS
+$ venv\Scripts\activate      # Windows
 
 $ deactivate # after finishing
 ```
@@ -20,4 +22,12 @@ $ python -m assistal
 ```sh
 $ pip install <deps>
 $ pip freeze > requirements.txt
+```
+
+## Testing
+
+**Generate random runtime data:**
+```sh
+python ./tests/conftest.py  # Linux/MacOS
+python tests\conftest.py    # Windows
 ```
