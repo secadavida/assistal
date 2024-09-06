@@ -1,20 +1,23 @@
-import os
-from assistal import config as C, fetcher
+import assistal.config as C
+import assistal.fetcher as fetcher
 import assistal.ui.commons as commons
-import assistal.xlsx as xlsx
+
+import assistal.ui.menus.manage_records as manage_records_
+
 
 def download_document():
 
     commons.print_text_ascii("Descargar Documento")
-    fetcher.download_google_drive_file(C.GOOGLE_DRIVE_CARDS_DOCUMENT, C.RUNTIME_ASSISTANCE_FILE)
+    fetcher.download_google_drive_file(C.GOOGLE_DRIVE_RECORDS_DOCUMENT, C.RUNTIME_ASSISTANCE_FILE)
     
 def manage_students():
 
     commons.print_text_ascii("Gestionar Estudiates")
 
-def manage_cards():
+def manage_records():
 
     commons.print_text_ascii("Gestionar Fichas")
+    manage_records_.run()
 
 def generate_assistance():
 
@@ -23,8 +26,8 @@ def generate_assistance():
 
 MENU_OPTIONS = {
     "⬇️  Descargar documento con las fichas": download_document,
+    "💻  Gestionar las fichas": manage_records,
     "🧒  Gestionar estudiantes": manage_students,
-    "💻  Gestionar las fichas": manage_cards,
     "📋  Generar asistencia": generate_assistance,
 }
 

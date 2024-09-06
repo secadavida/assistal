@@ -1,14 +1,14 @@
 import os
 import sys
 import time
-
+from pandas.core.common import inspect
 import pyfiglet
+
+from typing import Callable, Any, Dict
+import time
 
 FIGLET_BIG = pyfiglet.Figlet(font='slant')
 FIGLET_MINI = pyfiglet.Figlet(font='mini')
-
-from collections.abc import Callable
-import time
 
 
 def delete_all_lines_below_cursor():
@@ -20,9 +20,19 @@ def move_cursor_up(lines=1):
     sys.stdout.flush()
 
 def move_cursor_down(lines=1):
+    if lines == 0: return
     sys.stdout.write(f"\033[{lines}B")
     sys.stdout.flush()
 
+
+# example
+# FORM = {
+#     "question 1?": None,
+#     "question 2?": ["opt1", "opt2"],
+#     "question 3?": (assert_function, "on_fail message")
+#     "question 4?": int
+#
+# }
 def print_form_items(questions: dict[str, Callable], get_input = False):
 
     total_questions_left = len(questions)
@@ -47,32 +57,54 @@ def print_form_items(questions: dict[str, Callable], get_input = False):
             print(item, end = "")
 
             response = input()
-            
-            # get type assertion string
-            type_ = value
-            if isinstance(value, list):
-                type_ = type(value[0])
 
-            # try to convert the string to that type
-            try:
-                response = type_(response)
-            except ValueError:
-                return
+            if isinstance(value, tuple):
+                parameters = inspect.signature(value[0]).parameters
+                first_param_type = list(parameters.values())[0].annotation
 
-            # omit all other questions if the current one couldn't be asserted
-            if isinstance(value, list):
+                # try to convert the string to the type of the function's first parameter
+                try:
+                    response = first_param_type(response)
+                except ValueError:
+                    move_cursor_down(total_questions_left)
+                    return responses, f"la respuesta al campo '{key}' no tiene es del tipo apropiado"
+
+                if not value[0](response):
+                    move_cursor_down(total_questions_left)
+                    return responses, value[1]
+
+            elif isinstance(value, list):
+                type_: Callable[[Any], Any] = type(value[0])
+
+                # try to convert the string to that type
+                try:
+                    response = type_(response)
+                except ValueError:
+                    move_cursor_down(total_questions_left)
+                    return responses, f"La respuesta al campo '{key}' no es de tipo {type_.__name__}"
+
                 if response not in value:
                     move_cursor_down(total_questions_left)
-                    return
+                    return responses, f"La respuesta al campo '{key}' no es ninguna de {value}"
+
+            elif value != None: # is a casting func
+                type_: Callable[[Any], Any] = value
+                try:
+                    response = value(response)
+                except ValueError:
+                    move_cursor_down(total_questions_left)
+                    return responses, f"La respuesta al campo '{key}' no es de tipo {type_.__name__}"
+
+
 
             responses.append(response)
         else:
             print(item)
 
-    return responses
+    return responses, None
 
 
-def show_form(questions):
+def show_form(questions: Dict):
 
     responses = []
     
@@ -80,10 +112,10 @@ def show_form(questions):
 
     while True:
         print_form_items(questions)
-        responses = print_form_items(questions, True)
+        responses, retval = print_form_items(questions, get_input=True)
 
-        if responses is None:
-            print("\n\tuna de las respuestas no tiene el formato requerido")
+        if retval:
+            print(f"\n\terror: {retval}")
             time.sleep(1.5)
 
             move_cursor_up(len(questions) + 2)
@@ -108,20 +140,24 @@ def _clear_screen():
     else:
         os.system('clear')
 
-def display_menu(menu, banner_message: str, use_small_banner: bool = True, show_exit: bool = False):
+def display_fields(menu, banner_message: str, use_small_banner: bool = True, show_exit: bool = False, print_vals: bool = True):
 
     print_text_ascii(banner_message, use_small_banner)
 
-    for index, key in enumerate(menu.keys(), start=1):
-        print(f"{index}. {key}")
-    print("0. ⬅️  " + ("Salir" if show_exit else "Regresar"))
+    if print_vals:
+        for key, value in menu.items():
+            print(f"\t+ {key}: {value}")
+    else:
+        for index, key in enumerate(menu.keys(), start=1):
+            print(f"{index}. {key}")
 
 def show_menu(menu, banner: str, use_small_banner: bool = True, show_exit: bool = False):
 
     while True:
 
         _clear_screen()
-        display_menu(menu, banner, use_small_banner, show_exit)
+        display_fields(menu, banner, use_small_banner, show_exit, print_vals=False)
+        print("0. ⬅️  " + ("Salir" if show_exit else "Regresar"))
         print()
 
         choice = input(" 👉  ")

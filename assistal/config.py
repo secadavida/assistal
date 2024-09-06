@@ -23,4 +23,4 @@ _APP_ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RUNTIME_DIR = _join(_APP_ROOT_DIR, "runtime")
 RUNTIME_GROUPS_DIR = _join(RUNTIME_DIR, "groups")
 RUNTIME_ASSISTANCE_FILE = _join(RUNTIME_DIR, "asistencia.xlsx")
-GOOGLE_DRIVE_CARDS_DOCUMENT = ""
+GOOGLE_DRIVE_RECORDS_DOCUMENT = ""

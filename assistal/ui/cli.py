@@ -16,4 +16,4 @@ def parse_arguments() -> None:
     C.GENERATE_LOGS = False if args.no_logs else True
 
     if args.fichas != "":
-        C.GOOGLE_DRIVE_CARDS_DOCUMENT = args.fichas
+        C.GOOGLE_DRIVE_RECORDS_DOCUMENT = args.fichas
