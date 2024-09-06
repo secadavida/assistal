@@ -6,6 +6,7 @@ Caveats:
  - Only supports the file formats specified under $FILE_FORMATS
 """
 
+import time
 from assistal.logger import log, plog
 from assistal.ui import commons
 
@@ -95,6 +96,7 @@ def download_google_drive_file(url: str, destination: str) -> bool:
         progress_bar.close()
         
         plog("info", f"se descargo el archivo: {url}")
+        time.sleep(2)
         return True
 
     plog("error", f"no se pudo descargar el archivo: {url}. Estatus: {str(response.status_code)}")

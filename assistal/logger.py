@@ -116,5 +116,5 @@ def log(level: str, message: str) -> None:
 def plog(level: str, message: str) -> None:
 
     log(level, message)
-    if C.GENERATE_LOGS and not C.VERBOSE:
+    if C.GENERATE_LOGS or C.VERBOSE:
         print(message)

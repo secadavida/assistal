@@ -26,6 +26,7 @@ def main():
 
     create_runtime()
 
+    # NOTE: graceful exit, because any input() yields errors on KeyboardInterrupt
     try:
         tui.run()
     except KeyboardInterrupt:
