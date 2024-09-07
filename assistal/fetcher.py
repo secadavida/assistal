@@ -11,6 +11,7 @@ from assistal.logger import log, plog
 from assistal.ui import commons
 
 from tqdm import tqdm
+import pandas as pd
 import requests
 import re
 import os
@@ -39,7 +40,7 @@ def extract_file_properties(url):
 
     return *properties,
 
-def download_google_drive_file(url: str, destination: str) -> bool:
+def download_google_drive_file(url: str, destination: str, merge_criteria: list = []) -> bool:
 
     file_type, file_id = extract_file_properties(url)
 
@@ -69,15 +70,20 @@ def download_google_drive_file(url: str, destination: str) -> bool:
     if response.status_code == 200:
         
         log("info", f"el archivo {url} se encuentra disponible para descargar")
+        original_destination = destination
 
         if os.path.isfile(destination):
             plog("warning", f"ya hay un archivo presente en '{destination}'")
-            responses = commons.show_form({"Deseas reemplazarlo?": ["si", "no"]})
-            if responses[0] == "no":
+            choice = commons.show_form({"Que deseas hacer?": ["reemplazarlo", "juntarlo", "regresar"]})[0]
+            if choice == "regresar":
                 plog("info", f"el archivo en '{destination}' fue dejado intacto")
                 return False
+            elif choice == "juntarlo":
+                plog("info", f"el archivo '{destination}' va a ser juntado con el archivo remoto")
+                destination = destination + ".tmp"
+            else:
+                plog("info", f"se reemplazara el archivo en '{destination}'")
 
-        plog("info", f"se reemplazara el archivo en '{destination}'")
 
         # Total file size (in bytes) - You may need to get this from response.headers['Content-Length']
         total_size = int(response.headers.get('Content-Length', 0))
@@ -96,7 +102,44 @@ def download_google_drive_file(url: str, destination: str) -> bool:
         progress_bar.close()
         
         plog("info", f"se descargo el archivo: {url}")
-        time.sleep(2)
+        
+        if original_destination != destination:
+            # Read the Excel files
+            df1 = pd.read_excel(original_destination, sheet_name='Sheet1')
+            df2 = pd.read_excel(destination, sheet_name='Sheet1')
+
+            # create a unique key by combining all the merge_criteria
+            if merge_criteria: 
+
+                df1['key'] = df1[merge_criteria[0]].astype(str)
+                df2['key'] = df2[merge_criteria[0]].astype(str)
+
+                for i in range(1, len(merge_criteria)):
+                    df1['key'] += "_" + df1[merge_criteria[i]].astype(str)
+                    df2['key'] += "_" + df2[merge_criteria[i]].astype(str)
+
+            # Find the rows in df2 that do not have matching keys in df1
+            df2_filtered = df2[~df2['key'].isin(df1['key'])]
+
+            # Create copies to avoid modifying the original DataFrames directly
+            df1 = df1.copy()  # Fix: Create a copy to avoid modifying the original DataFrame directly
+            df2_filtered = df2_filtered.copy()  # Fix: Create a copy to avoid modifying the original DataFrame directly
+
+            # Drop the key column after filtering
+            df1.drop('key', axis=1, inplace=True)  # No fix needed here
+            df2_filtered.drop('key', axis=1, inplace=True)  # No fix needed here
+
+            # Append the filtered df2 to df1
+            combined_df = pd.concat([df1, df2_filtered], ignore_index=True)
+
+            # Save the combined DataFrame to a new Excel file
+            combined_df.to_excel(original_destination, index=False)
+
+            # Remove the temp file after merging it with the original
+            os.remove(destination)
+
+
+        time.sleep(1.5)
         return True
 
     plog("error", f"no se pudo descargar el archivo: {url}. Estatus: {str(response.status_code)}")
