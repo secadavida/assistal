@@ -33,7 +33,7 @@ def move_cursor_down(lines=1):
 #     "question 4?": int
 #
 # }
-def print_form_items(questions: dict[str, Callable], get_input = False):
+def print_form_items(questions: dict[str, Callable], get_input = False, allow_empty: bool = False):
 
     total_questions_left = len(questions)
     responses = []
@@ -57,6 +57,13 @@ def print_form_items(questions: dict[str, Callable], get_input = False):
             print(item, end = "")
 
             response = input()
+            if response == "":
+                if not allow_empty:
+                    move_cursor_down(total_questions_left)
+                    return responses, f"la respuesta al campo '{key}' no puede estar vacia"
+                else:
+                    responses.append(None)
+                    continue
 
             if isinstance(value, tuple):
                 parameters = inspect.signature(value[0]).parameters
@@ -95,8 +102,6 @@ def print_form_items(questions: dict[str, Callable], get_input = False):
                     move_cursor_down(total_questions_left)
                     return responses, f"La respuesta al campo '{key}' no es de tipo {type_.__name__}"
 
-
-
             responses.append(response)
         else:
             print(item)
@@ -104,7 +109,7 @@ def print_form_items(questions: dict[str, Callable], get_input = False):
     return responses, None
 
 
-def show_form(questions: Dict):
+def show_form(questions: Dict, allow_empty: bool = False):
 
     responses = []
     
@@ -112,7 +117,7 @@ def show_form(questions: Dict):
 
     while True:
         print_form_items(questions)
-        responses, retval = print_form_items(questions, get_input=True)
+        responses, retval = print_form_items(questions, get_input=True, allow_empty=allow_empty)
 
         if retval:
             print(f"\n\terror: {retval}")

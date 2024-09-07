@@ -22,3 +22,22 @@ class Base:
         parameters = inspect.signature(cls.__init__).parameters
 
         return [param for param in parameters if param != 'self']
+
+    @classmethod
+    def from_list(cls, values: list) -> dict:
+        parameters = inspect.signature(cls.__init__).parameters
+        
+        # remove 'self' from parameters
+        attributes = [param for param in parameters if param != 'self']
+        
+        # Ensure that the number of values matches the number of attributes
+        if len(attributes) != len(values):
+            raise ValueError(f"Expected {len(attributes)} values, got {len(values)}.")
+        
+        # create a dictionary by pairing attributes with corresponding values
+        record_dict = dict(zip(attributes, values))
+        
+        # remove keys with None values
+        record_dict = {k: v for k, v in record_dict.items() if v is not None}
+        
+        return record_dict

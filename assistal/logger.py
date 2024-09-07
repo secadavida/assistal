@@ -102,9 +102,8 @@ def setup():
         level=logging.DEBUG,
         format='[%(levelname)s] (%(asctime)s): %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S',
-        handlers = handlers # NOTE: if handlers = [], then it will print to STDOUT
+        handlers = handlers
     )
-
 
 def log(level: str, message: str) -> None:
 
@@ -116,5 +115,6 @@ def log(level: str, message: str) -> None:
 def plog(level: str, message: str) -> None:
 
     log(level, message)
-    if C.GENERATE_LOGS or C.VERBOSE:
-        print(message)
+    if not C.GENERATE_LOGS and not C.VERBOSE:
+        if level not in ["warning" or "error" or "critical"]:
+            print(message)
