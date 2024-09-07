@@ -11,7 +11,14 @@ import time
 
 def check_records():
 
-    commons.print_text_ascii("Revisar Fichas")
+    doc = XLSX(C.RUNTIME_ASSISTANCE_FILE, Record.get_fields_listed())
+
+    if not doc: return
+    doc.write_on_change = True
+
+    # while True:
+    #
+    # commons.print_text_ascii("Revisar Fichas")
 
 def modify_records():
 
@@ -30,9 +37,9 @@ def modify_records():
             break
 
         if response == "crear":
-            new_card_data = commons.show_form(Record.get_fields())
-
+            new_card_data = commons.show_form(Record.get_fields("estado", "timestamp"))
             final_card_data: Dict = Record.from_list(new_card_data)
+
             ok, level, message = \
                 doc.create_entry(final_card_data), \
                 "info", f"se logro crear al estudiante con identificacion {final_card_data["identificacion"]}"
@@ -45,23 +52,23 @@ def modify_records():
                 "Cual estudiante deseas gestionar (escribe la identificacion)?": (doc.has_entry, "la identificacion proporcionada no aparece en la tabla")
             })[0]
 
-            ok = False
-            message = f"se logro {response} a la identificacion {str(student_id)}"
-            status = "info"
+            ok, level, message = False, \
+                "info", f"se logro {response} a la identificacion {str(student_id)}"
+
             if response == "borrar":
                 ok = doc.delete_entry(student_id)
             else:
-                new_card_data = commons.show_form(Record.get_fields(), allow_empty=True)
+                new_card_data = commons.show_form(Record.get_fields("estado", "timestamp"), allow_empty=True)
+                final_card_data: Dict = Record.from_list(new_card_data, allow_nones=True)
 
-                final_card_data: Dict = Record.from_list(new_card_data)
                 ok = doc.update_entry(student_id, final_card_data)
 
             if not ok:
                 message = "no" + message
-                status = "warning"
+                level = "warning"
 
             print()
-            plog(status, message)
+            plog(level, message)
 
 
         time.sleep(1)

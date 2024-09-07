@@ -33,13 +33,12 @@ def move_cursor_down(lines=1):
 #     "question 4?": int
 #
 # }
-def print_form_items(questions: dict[str, Callable], get_input = False, allow_empty: bool = False):
+def print_form_items(questions: dict[str, Callable], total_questions: int, get_input = False, allow_empty: bool = False):
 
-    total_questions_left = len(questions)
     responses = []
 
     if get_input:
-        move_cursor_up(total_questions_left)
+        move_cursor_up(total_questions)
 
     for key, value in questions.items():
 
@@ -51,15 +50,20 @@ def print_form_items(questions: dict[str, Callable], get_input = False, allow_em
         else:
             item += ": "
 
-        if get_input:
+        if value is None:
+            if get_input:
+                responses.append(None)
+            continue
 
-            total_questions_left -= 1
+        if get_input:
+            
+            total_questions -= 1
             print(item, end = "")
 
             response = input()
             if response == "":
                 if not allow_empty:
-                    move_cursor_down(total_questions_left)
+                    move_cursor_down(total_questions)
                     return responses, f"la respuesta al campo '{key}' no puede estar vacia"
                 else:
                     responses.append(None)
@@ -73,11 +77,11 @@ def print_form_items(questions: dict[str, Callable], get_input = False, allow_em
                 try:
                     response = first_param_type(response)
                 except ValueError:
-                    move_cursor_down(total_questions_left)
+                    move_cursor_down(total_questions)
                     return responses, f"la respuesta al campo '{key}' no tiene es del tipo apropiado"
 
                 if not value[0](response):
-                    move_cursor_down(total_questions_left)
+                    move_cursor_down(total_questions)
                     return responses, value[1]
 
             elif isinstance(value, list):
@@ -87,11 +91,11 @@ def print_form_items(questions: dict[str, Callable], get_input = False, allow_em
                 try:
                     response = type_(response)
                 except ValueError:
-                    move_cursor_down(total_questions_left)
+                    move_cursor_down(total_questions)
                     return responses, f"La respuesta al campo '{key}' no es de tipo {type_.__name__}"
 
                 if response not in value:
-                    move_cursor_down(total_questions_left)
+                    move_cursor_down(total_questions)
                     return responses, f"La respuesta al campo '{key}' no es ninguna de {value}"
 
             elif value != None: # is a casting func
@@ -99,7 +103,7 @@ def print_form_items(questions: dict[str, Callable], get_input = False, allow_em
                 try:
                     response = value(response)
                 except ValueError:
-                    move_cursor_down(total_questions_left)
+                    move_cursor_down(total_questions)
                     return responses, f"La respuesta al campo '{key}' no es de tipo {type_.__name__}"
 
             responses.append(response)
@@ -112,18 +116,21 @@ def print_form_items(questions: dict[str, Callable], get_input = False, allow_em
 def show_form(questions: Dict, allow_empty: bool = False):
 
     responses = []
-    
+    total_questions = sum(1 for _, v in questions.items() if v is not None)
+    if total_questions == 0:
+        return responses
+
     print()
 
     while True:
-        print_form_items(questions)
-        responses, retval = print_form_items(questions, get_input=True, allow_empty=allow_empty)
+        print_form_items(questions, total_questions)
+        responses, retval = print_form_items(questions, total_questions, get_input=True, allow_empty=allow_empty)
 
         if retval:
             print(f"\n\terror: {retval}")
             time.sleep(1.5)
 
-            move_cursor_up(len(questions) + 2)
+            move_cursor_up(total_questions + 2)
             delete_all_lines_below_cursor()
         else:
             break

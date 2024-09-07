@@ -71,7 +71,8 @@ class XLSX:
         
         for key, value in updated_data.items():
             if key in self.df.columns:
-                self.df.loc[self.df['identificacion'] == identifier, key] = value
+                if value is not None:
+                    self.df.loc[self.df['identificacion'] == identifier, key] = value
             else:
                 return False
 

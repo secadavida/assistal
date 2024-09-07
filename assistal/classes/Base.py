@@ -2,16 +2,21 @@ import inspect
 from typing import Any, Dict
 
 class Base:
+
+    none_handlers = {}
+
     def __init__(self, identificacion: int):
         self.identificacion = identificacion
 
     @classmethod
-    def get_fields(cls) -> Dict[str, Any]:
+    def get_fields(cls, *drop) -> Dict[str, Any]:
         parameters = inspect.signature(cls.__init__).parameters
         fields = {}
 
         for name, param in parameters.items():
-            if name != 'self':
+            if name in drop:
+                fields[name] = None
+            elif name != 'self':
                 fields[name] = param.annotation if param.annotation is not inspect.Parameter.empty else Any
 
         return fields
@@ -24,7 +29,7 @@ class Base:
         return [param for param in parameters if param != 'self']
 
     @classmethod
-    def from_list(cls, values: list) -> dict:
+    def from_list(cls, values: list, allow_nones: bool = False) -> dict:
         parameters = inspect.signature(cls.__init__).parameters
         
         # remove 'self' from parameters
@@ -36,8 +41,19 @@ class Base:
         
         # create a dictionary by pairing attributes with corresponding values
         record_dict = dict(zip(attributes, values))
-        
-        # remove keys with None values
-        record_dict = {k: v for k, v in record_dict.items() if v is not None}
-        
-        return record_dict
+
+        # add items that are either not None, or are None but have a handler registered
+        if not allow_nones:
+
+            filtered_dict = {}
+
+            for k, v in record_dict.items():
+                if v is not None:
+                    filtered_dict[k] = v
+                else:
+                    if k in cls.none_handlers:
+                        filtered_dict[k] = cls.none_handlers[k]()
+
+            return filtered_dict
+        else:
+            return record_dict
