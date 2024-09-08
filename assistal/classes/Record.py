@@ -13,7 +13,7 @@ class Record(Base):
         "timestamp": _handler_timestamp
     }
 
-    def __init__(self, estado: str, timestamp: str, acudiente: str, parentesco: str, grado: int, grupo: str, identificacion: int, nombre_estudiante: str):
+    def __init__(self, estado: str, timestamp: str, acudiente: str, parentesco: str, grado: int, grupo: str, identificacion: int, nombre_estudiante: str, contacto: str):
         super().__init__(identificacion)
         self.estado = estado
         self.timestamp = timestamp
@@ -22,4 +22,5 @@ class Record(Base):
         self.grado = grado
         self.grupo = grupo
         self.nombre_estudiante = nombre_estudiante
+        self.contacto = contacto
 

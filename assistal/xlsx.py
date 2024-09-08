@@ -80,26 +80,28 @@ class XLSX:
 
         return mask
 
-    def query(self, _query: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def query(self, _query: Dict[str, Any]) -> Optional[List[Dict[str, Any]]]:
         """
-        Check if there is an entry in the DataFrame that matches all the given identifiers.
+        Check if there are entries in the DataFrame that match all the given identifiers.
 
         Parameters:
         _query (dict): A query matching columns and the values to match them for.
 
         Returns:
-        dict or None: If a matching entry is found, return the entire row as a dictionary (column: value). 
-                      If no match is found, return None.
+        List[dict] or None: A list of dictionaries representing the rows that match the query.
+                            If no match is found, return None.
         """
-
         mask = self.make_query_mask(_query)
 
         # Filter the DataFrame for matching rows
         matching_rows = self.df[mask]
 
         if not matching_rows.empty:
-            # Return the first match as a dictionary
-            return matching_rows.iloc[0].to_dict()
+            # Manually convert each row to a dictionary and return as a list
+            result = []
+            for _, row in matching_rows.iterrows():
+                result.append(row.to_dict())
+            return result
 
         # Return None if no match is found
         return None

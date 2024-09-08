@@ -1,4 +1,5 @@
 from typing import Any, Dict, List
+from assistal import email
 from assistal.classes.Record import Record
 from assistal.logger import log, plog
 from assistal.xlsx import XLSX
@@ -11,7 +12,7 @@ import time
 
 def check_records():
 
-    doc = XLSX(C.RUNTIME_ASSISTANCE_FILE, Record.get_fields_listed())
+    doc = XLSX(C.RUNTIME_RECORDS_FILE, Record.get_fields_listed())
 
     if not doc: return
     doc.write_on_change = True
@@ -23,7 +24,7 @@ def check_records():
 
         response: int = commons.show_form({"Cual ficha deseas marcar? (-1 para regresarse)": range(-1, len(doc.df)) })[0]
         if response == -1:
-            return
+            break
         
         table_row = doc.get_row(response)
 
@@ -34,7 +35,7 @@ def check_records():
             current_estado = updated_row["estado"]
 
             # toggle the sate
-            if not current_estado or current_estado != "revisado":
+            if not current_estado or current_estado == "rechazado":
                 updated_row["estado"] = "revisado"
             else:
                 updated_row["estado"] = "rechazado"
@@ -48,9 +49,56 @@ def check_records():
         time.sleep(1)
         commons._clear_screen()
 
+    denied_records = doc.query({"estado": "rechazado"})
+    if denied_records:
+
+        commons.print_text_ascii("Enviar correos")
+        response: int = commons.show_form({"Deseas enviar correos a las fichas marcadas como 'rechazadas'?": ["si", "no"]})[0]
+
+        if response == "no":
+            return
+
+        print()
+        user_email_data: Dict[str, Any] = commons.show_form_get_dict({
+            "email": str,
+            "contraseña": str
+        })
+
+        for denied_record in denied_records:
+            ok, level, message = email.send_email(
+                subject=f"Inasistencia rechazada de {denied_record["nombre_estudiante"]} para el {denied_record["timestamp"]}",
+                body=f"Buenas tardes {denied_record["acudiente"]},\n\
+                    no se pudo validar la informacion recibida en el formulario de petificion de fichas. Por favor, verifiquela.\n\
+                    Muchas gracias.",
+                to_email=denied_record["contacto"],
+                from_email=user_email_data["email"],
+                password=user_email_data["contraseña"]
+            ), "info", f"se envio un a {denied_record["acudiente"]} con correo {denied_record["contacto"]}"
+
+            if not ok:
+                level = "warning"
+                message = "no " + message
+
+            else:
+                denied_record_updated = denied_record.copy()
+                denied_record_updated["estado"] = "avisado"
+
+                ok, _level, _message = doc.update_entry(denied_record, denied_record_updated), \
+                    "info", "se actualizo el estado de la ficha"
+
+                if not ok:
+                    _level = "warning"
+                    _message = "no " + _message
+
+                plog(_level, _message)
+
+            plog(level, message)
+
+        time.sleep(1)
+
 def modify_records():
 
-    doc = XLSX(C.RUNTIME_ASSISTANCE_FILE, Record.get_fields_listed())
+    doc = XLSX(C.RUNTIME_RECORDS_FILE, Record.get_fields_listed())
 
     if not doc: return
     doc.write_on_change = True

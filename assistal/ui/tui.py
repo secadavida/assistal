@@ -8,7 +8,7 @@ import assistal.ui.menus.manage_records as manage_records_
 def download_document():
 
     commons.print_text_ascii("Descargar Documento")
-    fetcher.download_google_drive_file(C.GOOGLE_DRIVE_RECORDS_DOCUMENT, C.RUNTIME_ASSISTANCE_FILE, merge_criteria=["timestamp", "identificacion"])
+    fetcher.download_google_drive_file(C.GOOGLE_DRIVE_RECORDS_DOCUMENT, C.RUNTIME_RECORDS_FILE, merge_criteria=["timestamp", "identificacion"])
     
 def manage_students():
 
