@@ -1,3 +1,5 @@
+from typing import Any, Dict, List, Type, Union
+from assistal.classes.Base import Base
 from assistal.logger import log, plog
 from assistal.ui import commons
 from tabulate import tabulate
@@ -22,7 +24,7 @@ class XLSX:
     def save(self):
         self.df.to_excel(self.file_path, index=False, engine='openpyxl')
 
-    def __init__(self, file_path: str, column_headers: list):
+    def __init__(self, file_path: str, column_headers: List[str]):
         self.file_path = file_path
         self.column_headers = column_headers
         self.write_on_change = False
@@ -32,7 +34,7 @@ class XLSX:
         self.update_entry = self.perform_save_on_change(self.update_entry)
         self.delete_entry = self.perform_save_on_change(self.delete_entry)
 
-        if XLSX.file_exists(file_path, column_headers):
+        if XLSX.file_exists(file_path, self.column_headers):
             self.df: pd.DataFrame = pd.read_excel(file_path, engine='openpyxl')
 
         return None
@@ -51,73 +53,89 @@ class XLSX:
 
         return True
 
-    def has_entry(self, identifier: int) -> bool:
-        return identifier in self.df['identificacion'].values
+    def query(self, _query: Dict[str, Any]) -> bool:
+        """
+        Check if there is an entry in the DataFrame that matches all the given identifiers.
 
-    def create_entry(self, new_data) -> bool:
-        if new_data["identificacion"]:
-            if self.has_entry(new_data["identificacion"]):
-                return False
-        else:
+        Parameters:
+        _query (dict): a query matching columns and the values to match them for
+
+        Returns:
+        bool: True if an entry matching all criteria exists, False otherwise.
+        """
+        # Construct a boolean mask based on the criteria
+        mask = pd.Series([True] * len(self.df))  # Start with a mask of True values
+
+        for key, value in _query.items():
+            if key in self.df.columns:
+                mask &= (self.df[key] == value)
+            else:
+                raise ValueError(f"Column '{key}' does not exist in DataFrame")
+
+        return mask.any()
+
+    def create_entry(self, new_data: Dict[str, Any]) -> bool:
+        if self.query(new_data):
             return False
 
         self.df = self.df._append(new_data, ignore_index=True)
 
         return True
      
-    def update_entry(self, identifier, updated_data) -> bool:
-        if not self.has_entry(identifier):
+    def update_entry(self, _query: Dict[str, Any], updated_data: Dict[str, Any]) -> bool:
+        # Check if there are entries matching the identifiers
+        if not self.query(_query):
+            return False
+
+        # Construct a boolean mask based on the identifiers
+        mask = pd.Series([True] * len(self.df))  # Start with a mask of True values
+
+        for key, value in _query.items():
+            if key in self.df.columns:
+                mask &= (self.df[key] == value)
+            else:
+                raise ValueError(f"Column '{key}' does not exist in DataFrame")
+
+        if not mask.any():
             return False
         
+        # Update the matching rows with the updated_data
         for key, value in updated_data.items():
             if key in self.df.columns:
                 if value is not None:
-                    self.df.loc[self.df['identificacion'] == identifier, key] = value
+                    self.df.loc[mask, key] = value
             else:
-                return False
+                raise ValueError(f"Column '{key}' does not exist in DataFrame")
 
         return True
     
-    def delete_entry(self, identifier: int) -> bool:
-        if not self.has_entry(identifier):
+    def delete_entry(self, _query: Dict[str, Any]) -> bool:
+        if not _query:
             return False
-        
-        indices_to_drop = self.df.index[self.df['identificacion'] == identifier].tolist()
+
+        # Use the query method to check if any entry matches the identifiers
+        if not self.query(_query):
+            return False
+
+        # Construct a boolean mask based on the criteria
+        mask = pd.Series([True] * len(self.df))  # Start with a mask of True values
+
+        for key, value in _query.items():
+            if key in self.df.columns:
+                mask &= (self.df[key] == value)
+            else:
+                raise ValueError(f"Column '{key}' does not exist in DataFrame")
+
+        # Get indices to drop
+        indices_to_drop = self.df.index[mask].tolist()
+
+        if not indices_to_drop:
+            return False
+
+        # Drop the rows from the DataFrame
         self.df.drop(indices_to_drop, inplace=True)
 
         return True
     
     def pretty_print(self):
         print(tabulate(self.df, headers='keys', tablefmt='grid', showindex=False))
-
-# # Example usage
-# file_path = 'example.xlsx'
-#
-# # Load Excel data
-# df = load_excel(file_path)
-#
-# # Example data
-# new_entry = {
-#     'acudiente': 'Carlos',
-#     'parentesco': 'tio',
-#     'grado': 9,
-#     'grupo': 'A',
-#     'identificacion': 1234,
-#     'nombre_estudiante': 'Carlos Smith'
-# }
-#
-# # Create a new entry
-# df = create_entry(df, new_entry)
-#
-# # Read an entry
-# entry = read_entry(df, 5200)  # Reading entry by ID
-# print(entry)
-#
-# # Update an entry
-# df = update_entry(df, 5200, {'nombre_estudiante': 'Amanda E.'})
-#
-# # Delete an entry
-# df = delete_entry(df, 9371)  # Deleting entry by ID
-#
-# # Save changes to Excel
-# save_excel(df, file_path)

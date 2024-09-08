@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 class Base:
 
@@ -22,7 +22,7 @@ class Base:
         return fields
 
     @classmethod
-    def get_fields_listed(cls) -> list[str]:
+    def get_fields_listed(cls) -> List[str]:
 
         parameters = inspect.signature(cls.__init__).parameters
 

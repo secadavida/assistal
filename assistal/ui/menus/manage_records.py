@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict, List
 from assistal.classes.Record import Record
 from assistal.logger import log, plog
 from assistal.xlsx import XLSX
@@ -12,6 +12,7 @@ import time
 def check_records():
 
     doc = XLSX(C.RUNTIME_ASSISTANCE_FILE, Record.get_fields_listed())
+
 
     if not doc: return
     doc.write_on_change = True
@@ -37,8 +38,9 @@ def modify_records():
             break
 
         if response == "crear":
+
             new_card_data = commons.show_form(Record.get_fields("estado", "timestamp"))
-            final_card_data: Dict = Record.from_list(new_card_data)
+            final_card_data: Dict[str, Any] = Record.from_list(new_card_data)
 
             ok, level, message = \
                 doc.create_entry(final_card_data), \
@@ -48,20 +50,24 @@ def modify_records():
             plog(level, f"{'not' if not ok else ''}{message}")
 
         elif response == "actualizar" or response == "borrar":
-            student_id: int = commons.show_form({
-                "Cual estudiante deseas gestionar (escribe la identificacion)?": (doc.has_entry, "la identificacion proporcionada no aparece en la tabla")
-            })[0]
+
+            print("Cual ficha deseas gestionar?")
+            record_search_criteria = commons.show_form_get_dict({
+                "identificacion": int,
+                "timestamp": str
+            }, cumulative_callback=(doc.query, "no se encontro ninguna fila que cumpliera con esos campos"))
 
             ok, level, message = False, \
-                "info", f"se logro {response} a la identificacion {str(student_id)}"
+                "info", f"se logro {response} la ficha con timestamp \
+                    {str(record_search_criteria['timestamp'])} e identificacion {str(record_search_criteria['identificacion'])}"
 
             if response == "borrar":
-                ok = doc.delete_entry(student_id)
+                ok = doc.delete_entry(record_search_criteria)
             else:
                 new_card_data = commons.show_form(Record.get_fields("estado", "timestamp"), allow_empty=True)
-                final_card_data: Dict = Record.from_list(new_card_data, allow_nones=True)
+                final_card_data: Dict[str, Any] = Record.from_list(new_card_data, allow_nones=True)
 
-                ok = doc.update_entry(student_id, final_card_data)
+                ok = doc.update_entry(record_search_criteria, final_card_data)
 
             if not ok:
                 message = "no" + message

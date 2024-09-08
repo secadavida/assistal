@@ -4,7 +4,7 @@ import time
 from pandas.core.common import inspect
 import pyfiglet
 
-from typing import Callable, Any, Dict
+from typing import Callable, Any, Dict, List, Optional, Tuple, Union
 import time
 
 FIGLET_BIG = pyfiglet.Figlet(font='slant')
@@ -112,8 +112,7 @@ def print_form_items(questions: dict[str, Callable], total_questions: int, get_i
 
     return responses, None
 
-
-def show_form(questions: Dict, allow_empty: bool = False):
+def show_form(questions: Dict, cumulative_callback: Optional[Tuple[Callable[[Dict[str, Any]], bool], str]] = None, allow_empty: bool = False) -> List[Any]:
 
     responses = []
     total_questions = sum(1 for _, v in questions.items() if v is not None)
@@ -126,6 +125,11 @@ def show_form(questions: Dict, allow_empty: bool = False):
         print_form_items(questions, total_questions)
         responses, retval = print_form_items(questions, total_questions, get_input=True, allow_empty=allow_empty)
 
+        if cumulative_callback:
+            responses_dict = {key: value for key, value in zip(questions.keys(), responses)}
+            if not cumulative_callback[0](responses_dict):
+                responses, retval = [], cumulative_callback[1]
+
         if retval:
             print(f"\n\terror: {retval}")
             time.sleep(1.5)
@@ -137,6 +141,10 @@ def show_form(questions: Dict, allow_empty: bool = False):
 
     return responses
 
+def show_form_get_dict(questions: Dict, cumulative_callback: Optional[Tuple[Callable[[Dict[str, Any]], bool], str]] = None, allow_empty: bool = False) -> Dict[str, Any]:
+    responses = show_form(questions, cumulative_callback, allow_empty)
+
+    return {key: value for key, value in zip(questions.keys(), responses)}
 
 def print_text_ascii(message: str, use_small_banner: bool = True) -> None:
 
