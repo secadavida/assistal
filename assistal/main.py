@@ -17,6 +17,10 @@ def create_runtime():
         logger.log("info", "creando directorio para los grupos estudiantiles")
         os.mkdir(C.RUNTIME_GROUPS_DIR)
 
+    if not os.path.exists(C.RUNTIME_ASSISTANCE_DIR):
+        logger.log("info", "creando directorio para la asistencia")
+        os.mkdir(C.RUNTIME_ASSISTANCE_DIR)
+
 def main():
 
     cli.parse_arguments()

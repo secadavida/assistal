@@ -1,8 +1,9 @@
-from typing import Any, Dict, List
+from typing import Any, Dict
 from assistal import email
 from assistal.classes.Record import Record
-from assistal.logger import log, plog
+from assistal.logger import plog
 from assistal.xlsx import XLSX
+import pandas as pd
 
 import assistal.ui.commons as commons
 import assistal.config as C
@@ -35,8 +36,8 @@ def check_records():
             current_estado = updated_row["estado"]
 
             # toggle the sate
-            if not current_estado or current_estado == "rechazado":
-                updated_row["estado"] = "revisado"
+            if pd.isna(current_estado) or current_estado == "rechazado":
+                updated_row["estado"] = "aceptado"
             else:
                 updated_row["estado"] = "rechazado"
 

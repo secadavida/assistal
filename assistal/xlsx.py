@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Optional, Type, Union
 
-import numpy
 from assistal.classes.Base import Base
 from assistal.logger import log, plog
 from assistal.ui import commons
