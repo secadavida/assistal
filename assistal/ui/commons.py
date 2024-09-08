@@ -47,6 +47,8 @@ def print_form_items(questions: dict[str, Callable], total_questions: int, get_i
 
         if isinstance(value, list):
             item += f" ({', '.join(value)}): "
+        elif isinstance(value, range):
+            item += f" ({value[0]}-{value[-1]}): "
         else:
             item += ": "
 
@@ -98,6 +100,19 @@ def print_form_items(questions: dict[str, Callable], total_questions: int, get_i
                     move_cursor_down(total_questions)
                     return responses, f"La respuesta al campo '{key}' no es ninguna de {value}"
 
+            elif isinstance(value, range):
+                
+                # try to convert the string to int
+                try:
+                    response = int(response)
+                except ValueError:
+                    move_cursor_down(total_questions)
+                    return responses, f"La respuesta al campo '{key}' no es de tipo int"
+
+                if response not in value:
+                    move_cursor_down(total_questions)
+                    return responses, f"La respuesta al campo '{key}' no esta en el rango ({value[0]}-{value[-1]})"
+
             elif value != None: # is a casting func
                 type_: Callable[[Any], Any] = value
                 try:
@@ -112,7 +127,7 @@ def print_form_items(questions: dict[str, Callable], total_questions: int, get_i
 
     return responses, None
 
-def show_form(questions: Dict, cumulative_callback: Optional[Tuple[Callable[[Dict[str, Any]], bool], str]] = None, allow_empty: bool = False) -> List[Any]:
+def show_form(questions: Dict, cumulative_callback: Optional[Tuple[Callable[[Dict[str, Any]], Any], str]] = None, allow_empty: bool = False) -> List[Any]:
 
     responses = []
     total_questions = sum(1 for _, v in questions.items() if v is not None)
@@ -141,7 +156,7 @@ def show_form(questions: Dict, cumulative_callback: Optional[Tuple[Callable[[Dic
 
     return responses
 
-def show_form_get_dict(questions: Dict, cumulative_callback: Optional[Tuple[Callable[[Dict[str, Any]], bool], str]] = None, allow_empty: bool = False) -> Dict[str, Any]:
+def show_form_get_dict(questions: Dict, cumulative_callback: Optional[Tuple[Callable[[Dict[str, Any]], Any], str]] = None, allow_empty: bool = False) -> Dict[str, Any]:
     responses = show_form(questions, cumulative_callback, allow_empty)
 
     return {key: value for key, value in zip(questions.keys(), responses)}

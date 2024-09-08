@@ -1,4 +1,6 @@
-from typing import Any, Dict, List, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union
+
+import numpy
 from assistal.classes.Base import Base
 from assistal.logger import log, plog
 from assistal.ui import commons
@@ -53,26 +55,54 @@ class XLSX:
 
         return True
 
-    def query(self, _query: Dict[str, Any]) -> bool:
+    # query by specific row index
+    def get_row(self, row_index: int) -> Optional[Dict[str, Any]]:
+
+        # if row index is within range
+        if 0 <= row_index < len(self.df):
+            return self.df.iloc[row_index].to_dict()
+
+        return None
+
+    def make_query_mask(self, _query: Dict[str, Any]) -> pd.Series:
+
+        # Remove any keys from the query where the value is NaN
+        _query = {k: v for k, v in _query.items() if not pd.isna(v)}
+
+        # Construct a boolean mask based on the criteria
+        mask = pd.Series([True] * len(self.df))  # Start with a mask of True values
+
+        for column, value in _query.items():
+            if column in self.df.columns:
+                mask &= (self.df[column] == value)
+            else:
+                raise ValueError(f"Column '{column}' does not exist in DataFrame")
+
+        return mask
+
+    def query(self, _query: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
         Check if there is an entry in the DataFrame that matches all the given identifiers.
 
         Parameters:
-        _query (dict): a query matching columns and the values to match them for
+        _query (dict): A query matching columns and the values to match them for.
 
         Returns:
-        bool: True if an entry matching all criteria exists, False otherwise.
+        dict or None: If a matching entry is found, return the entire row as a dictionary (column: value). 
+                      If no match is found, return None.
         """
-        # Construct a boolean mask based on the criteria
-        mask = pd.Series([True] * len(self.df))  # Start with a mask of True values
 
-        for key, value in _query.items():
-            if key in self.df.columns:
-                mask &= (self.df[key] == value)
-            else:
-                raise ValueError(f"Column '{key}' does not exist in DataFrame")
+        mask = self.make_query_mask(_query)
 
-        return mask.any()
+        # Filter the DataFrame for matching rows
+        matching_rows = self.df[mask]
+
+        if not matching_rows.empty:
+            # Return the first match as a dictionary
+            return matching_rows.iloc[0].to_dict()
+
+        # Return None if no match is found
+        return None
 
     def create_entry(self, new_data: Dict[str, Any]) -> bool:
         if self.query(new_data):
@@ -83,18 +113,14 @@ class XLSX:
         return True
      
     def update_entry(self, _query: Dict[str, Any], updated_data: Dict[str, Any]) -> bool:
-        # Check if there are entries matching the identifiers
+        if not _query:
+            return False
+
         if not self.query(_query):
             return False
 
         # Construct a boolean mask based on the identifiers
-        mask = pd.Series([True] * len(self.df))  # Start with a mask of True values
-
-        for key, value in _query.items():
-            if key in self.df.columns:
-                mask &= (self.df[key] == value)
-            else:
-                raise ValueError(f"Column '{key}' does not exist in DataFrame")
+        mask = self.make_query_mask(_query)
 
         if not mask.any():
             return False
@@ -117,14 +143,8 @@ class XLSX:
         if not self.query(_query):
             return False
 
-        # Construct a boolean mask based on the criteria
-        mask = pd.Series([True] * len(self.df))  # Start with a mask of True values
-
-        for key, value in _query.items():
-            if key in self.df.columns:
-                mask &= (self.df[key] == value)
-            else:
-                raise ValueError(f"Column '{key}' does not exist in DataFrame")
+        # Construct a boolean mask based on the identifiers
+        mask = self.make_query_mask(_query)
 
         # Get indices to drop
         indices_to_drop = self.df.index[mask].tolist()
@@ -137,5 +157,5 @@ class XLSX:
 
         return True
     
-    def pretty_print(self):
-        print(tabulate(self.df, headers='keys', tablefmt='grid', showindex=False))
+    def pretty_print(self, show_index: bool = False):
+        print(tabulate(self.df, headers='keys', tablefmt='grid', showindex=show_index))

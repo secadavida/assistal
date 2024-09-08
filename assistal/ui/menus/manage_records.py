@@ -13,13 +13,40 @@ def check_records():
 
     doc = XLSX(C.RUNTIME_ASSISTANCE_FILE, Record.get_fields_listed())
 
-
     if not doc: return
     doc.write_on_change = True
 
-    # while True:
-    #
-    # commons.print_text_ascii("Revisar Fichas")
+    while True:
+        commons.print_text_ascii("Revisar Fichas")
+
+        doc.pretty_print(show_index=True)
+
+        response: int = commons.show_form({"Cual ficha deseas marcar? (-1 para regresarse)": range(-1, len(doc.df)) })[0]
+        if response == -1:
+            return
+        
+        table_row = doc.get_row(response)
+
+        ok, level, message = False, "warning", f"no se pudo actualizar la fila {response}"
+
+        if table_row != None:
+            updated_row = table_row.copy()
+            current_estado = updated_row["estado"]
+
+            # toggle the sate
+            if not current_estado or current_estado != "revisado":
+                updated_row["estado"] = "revisado"
+            else:
+                updated_row["estado"] = "rechazado"
+
+            ok = doc.update_entry(table_row, updated_row)
+            if ok:
+                level, message = "info", f"se actualizo el estado de la fila {response} correctamente"
+
+        plog(level, message)
+
+        time.sleep(1)
+        commons._clear_screen()
 
 def modify_records():
 
@@ -39,12 +66,12 @@ def modify_records():
 
         if response == "crear":
 
-            new_card_data = commons.show_form(Record.get_fields("estado", "timestamp"))
-            final_card_data: Dict[str, Any] = Record.from_list(new_card_data)
+            new_record_data = commons.show_form(Record.get_fields("estado", "timestamp"))
+            final_record_data: Dict[str, Any] = Record.from_list(new_record_data)
 
             ok, level, message = \
-                doc.create_entry(final_card_data), \
-                "info", f"se logro crear al estudiante con identificacion {final_card_data["identificacion"]}"
+                doc.create_entry(final_record_data), \
+                "info", f"se logro crear al estudiante con identificacion {final_record_data["identificacion"]}"
 
             print()
             plog(level, f"{'not' if not ok else ''}{message}")
@@ -64,10 +91,10 @@ def modify_records():
             if response == "borrar":
                 ok = doc.delete_entry(record_search_criteria)
             else:
-                new_card_data = commons.show_form(Record.get_fields("estado", "timestamp"), allow_empty=True)
-                final_card_data: Dict[str, Any] = Record.from_list(new_card_data, allow_nones=True)
+                new_record_data = commons.show_form(Record.get_fields("estado", "timestamp"), allow_empty=True)
+                final_record_data: Dict[str, Any] = Record.from_list(new_record_data, allow_nones=True)
 
-                ok = doc.update_entry(record_search_criteria, final_card_data)
+                ok = doc.update_entry(record_search_criteria, final_record_data)
 
             if not ok:
                 message = "no" + message
