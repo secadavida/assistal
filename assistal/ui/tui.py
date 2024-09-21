@@ -86,7 +86,7 @@ def generate_assistance():
                 horas = [i for i in range(int(horas[0]), int(horas[1]) + 1)]
 
             except:
-                horas = [row["hora"]]
+                horas = int([row["hora"]])
         # Leer el archivo de lista de asistencia
         wb = load_workbook(temp_file)
         ws = wb.active
