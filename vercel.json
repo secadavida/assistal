@@ -20,12 +20,10 @@
     }
   ]
 }
-  ],
   "routes": [
     {
       "src": "/(.*)",
       "dest": "/backend/index.py"
     }
   ]
-}
 
