@@ -51,6 +51,7 @@ def check_records():
         commons._clear_screen()
 
     denied_records = doc.query({"estado": "rechazado"})
+    
     if denied_records:
 
         commons.print_text_ascii("Enviar correos")
@@ -67,14 +68,14 @@ def check_records():
 
         for denied_record in denied_records:
             ok, level, message = email.send_email(
-                subject=f"Inasistencia rechazada de {denied_record["nombre_estudiante"]} para el {denied_record["timestamp"]}",
-                body=f"Buenas tardes {denied_record["acudiente"]},\n\
+                subject=f"Inasistencia rechazada de {denied_record['nombre_estudiante']} para el {denied_record['timestamp']}",
+                body=f"Buenas tardes {denied_record['acudiente']},\n\
                     no se pudo validar la informacion recibida en el formulario de petificion de fichas. Por favor, verifiquela.\n\
                     Muchas gracias.",
                 to_email=denied_record["contacto"],
                 from_email=user_email_data["email"],
                 password=user_email_data["contraseña"]
-            ), "info", f"se envio un a {denied_record["acudiente"]} con correo {denied_record["contacto"]}"
+            ), "info", f"se envio un a {denied_record['acudiente']} con correo {denied_record['contacto']}"
 
             if not ok:
                 level = "warning"
@@ -120,7 +121,7 @@ def modify_records():
 
             ok, level, message = \
                 doc.create_entry(final_record_data), \
-                "info", f"se logro crear al estudiante con identificacion {final_record_data["identificacion"]}"
+                "info", f"se logro crear al estudiante con identificacion {final_record_data['identificacion']}"
 
             print()
             plog(level, f"{'not' if not ok else ''}{message}")

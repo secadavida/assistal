@@ -10,21 +10,6 @@ import os
 
 
 class XLSX:
-
-    def perform_save_on_change(self, func):
-        def wrapper(*args, **kwargs):
-            result = func(*args, **kwargs)
-
-            if self.write_on_change:
-                self.save()
-
-            return result
-
-        return wrapper
-
-    def save(self):
-        self.df.to_excel(self.file_path, index=False, engine='openpyxl')
-
     def __init__(self, file_path: str, column_headers: List[str]):
         self.file_path = file_path
         self.column_headers = column_headers
@@ -39,6 +24,20 @@ class XLSX:
             self.df: pd.DataFrame = pd.read_excel(file_path, engine='openpyxl')
 
         return None
+
+    def perform_save_on_change(self, func):
+        def wrapper(*args, **kwargs):
+            result = func(*args, **kwargs)
+
+            if self.write_on_change:
+                self.save()
+
+            return result
+
+        return wrapper
+
+    def save(self):
+        self.df.to_excel(self.file_path, index=False, engine='openpyxl')
 
     @classmethod
     def file_exists(cls, destination_file, column_headers) -> bool:
