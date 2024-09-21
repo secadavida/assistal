@@ -6,9 +6,20 @@
       "use": "@vercel/python"
     },
     {
-      "src": "frontend/package.json",  # Si tienes un frontend en Node.js o React
-      "use": "@vercel/node"
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
     }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/frontend"
+    }
+  ]
+}
   ],
   "routes": [
     {
