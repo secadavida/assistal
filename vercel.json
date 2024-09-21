@@ -1,9 +1,20 @@
 {
   "version": 2,
   "builds": [
-    { "src": "assistal/wsgi.py", "use": "@vercel/python" }
+    {
+      "src": "backend/index.py",  # Ajusta la ruta de tu archivo principal
+      "use": "@vercel/python"
+    },
+    {
+      "src": "frontend/package.json",  # Si tienes un frontend en Node.js o React
+      "use": "@vercel/node"
+    }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "assistal/wsgi.py" }
+    {
+      "src": "/(.*)",
+      "dest": "/backend/index.py"
+    }
   ]
 }
+
