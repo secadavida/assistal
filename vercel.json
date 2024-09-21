@@ -1,9 +1,29 @@
 {
   "version": 2,
   "builds": [
-    { "src": "assistal/wsgi.py", "use": "@vercel/python" }
+    {
+      "src": "backend/index.py",  # Ajusta la ruta de tu archivo principal
+      "use": "@vercel/python"
+    },
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "assistal/wsgi.py" }
+    {
+      "src": "/(.*)",
+      "dest": "/frontend"
+    }
   ]
 }
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/backend/index.py"
+    }
+  ]
+
