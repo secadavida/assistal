@@ -27,3 +27,8 @@ RUNTIME_ASSISTANCE_DIR = _join(RUNTIME_DIR, "asistencia")
 RUNTIME_RECORDS_FILE = _join(RUNTIME_DIR, "fichas.xlsx")
 RUNTIME_ASSISTANCE_FILE = _join(RUNTIME_ASSISTANCE_DIR, "asistencia.xlsx")
 GOOGLE_DRIVE_RECORDS_DOCUMENT = ""
+
+# test email. If gmail is used as the email provider, the password must be an app password
+
+USER_EMAIL = ""
+USER_PASSWORD = ""
