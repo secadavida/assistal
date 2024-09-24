@@ -79,14 +79,19 @@ def generate_assistance():
         
         if row["hora"] == "toda":
             horas = [1, 2, 3, 4, 5, 6]
-        
         else:
             try:
-                horas = row["hora"].split("-")
-                horas = [i for i in range(int(horas[0]), int(horas[1]) + 1)]
+                horas = list(map(int, str(row["hora"]).split("-")))
+
+                # has only one num as format, not ##-##
+                if 1 not in horas:
+                    horas = [int(horas[0])]
+                else:
+                    horas = [i for i in range(int(horas[0]), int(horas[1]) + 1)]
 
             except:
-                horas = int([row["hora"]])
+                horas = list(int([row["hora"]]))
+
         # Leer el archivo de lista de asistencia
         wb = load_workbook(temp_file)
         ws = wb.active
