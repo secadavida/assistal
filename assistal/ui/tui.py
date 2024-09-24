@@ -7,6 +7,8 @@ from assistal.classes.AssistanceEntry import AssistanceEntry
 from assistal.classes.Record import Record
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
+import pandas as pd
+import assistal.email as email
 
 import assistal.ui.menus.manage_records as manage_records_
 
@@ -79,19 +81,14 @@ def generate_assistance():
         
         if row["hora"] == "toda":
             horas = [1, 2, 3, 4, 5, 6]
+        
         else:
             try:
-                horas = list(map(int, str(row["hora"]).split("-")))
-
-                # has only one num as format, not ##-##
-                if 1 not in horas:
-                    horas = [int(horas[0])]
-                else:
-                    horas = [i for i in range(int(horas[0]), int(horas[1]) + 1)]
+                horas = row["hora"].split("-")
+                horas = [i for i in range(int(horas[0]), int(horas[1]) + 1)]
 
             except:
-                horas = list(int([row["hora"]]))
-
+                horas = [row["hora"]]
         # Leer el archivo de lista de asistencia
         wb = load_workbook(temp_file)
         ws = wb.active
@@ -129,6 +126,25 @@ def generate_assistance():
 
     print()
     assistance_doc.pretty_print()
+
+    # Enviar correos a los grados-cursos correspondientes
+
+    commons.print_text_ascii("Enviar correos")
+    response: int = commons.show_form({"Deseas enviar los correos con las listas de asistencia semanales?": ["si", "no"]})[0]
+
+    if response == "no":
+            return
+    
+    if response == "si":
+        emails_doc = XLSX(C._join(C.RUNTIME_DIR, "Correos_Grupos.xlsx"), ["grado", "grupo", "email"])
+        
+        for _, row in emails_doc.df.iterrows():
+            grado, grupo, to_email = row["grado"], row["grupo"], row["email"]
+            temp_file = C._join(C.RUNTIME_GROUPS_DIR, str(grado), f"lista_asistencia_{str(grado)}-{str(grupo)}.xlsx")
+            email.send_email("Lista de Asistencia Semanal", "Adjunto se encuentra la lista de asistencia semanal", to_email, C.USER_EMAIL, C.USER_PASSWORD, temp_file)
+            print(f"Correo enviado a {to_email} con la lista de asistencia semanal")
+            plog("info", f"Correo enviado a {to_email} con la lista de asistencia semanal")
+
 
     commons.show_form({"Presiona <Enter> para regresar": str}, allow_empty=True)
 
