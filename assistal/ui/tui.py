@@ -149,11 +149,7 @@ def generate_assistance():
 
     commons.show_form({"Presiona <Enter> para regresar": str}, allow_empty=True)
 
-def open_assistance_directory():
-
-    commons.print_text_ascii("Carpeta de Asistencia")
-
-    path = C.RUNTIME_GROUPS_DIR 
+def system_open_dir(path):
     system = os.name
 
     if os.name == "nt":
@@ -166,13 +162,23 @@ def open_assistance_directory():
     else:
         raise OSError("Unsupported operating system")
 
+def open_general_assistance_directory():
+
+    commons.print_text_ascii("Carpeta de Asistencia")
+    system_open_dir(C.RUNTIME_ASSISTANCE_DIR)
+
+def open_groups_dir():
+
+    commons.print_text_ascii("Carpeta de Grupos")
+    system_open_dir(C.RUNTIME_GROUPS_DIR)
 
 MENU_OPTIONS = {
     "⬇️  Descargar documento con las fichas": download_document,
     "💻  Gestionar las fichas": manage_records,
     "🧒  Gestionar estudiantes": manage_students,
     "📋  Generar asistencia": generate_assistance,
-    "📁  Abrir carpeta de asistencia": open_assistance_directory
+    "📁  Abrir carpeta de asistencia general": open_general_assistance_directory,
+    "📁  Abrir carpeta de grupos": open_groups_dir
 }
 
 def run():
