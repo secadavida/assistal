@@ -9,6 +9,7 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 import pandas as pd
 import assistal.email as email
+import os
 
 import assistal.ui.menus.manage_records as manage_records_
 
@@ -148,11 +149,30 @@ def generate_assistance():
 
     commons.show_form({"Presiona <Enter> para regresar": str}, allow_empty=True)
 
+def open_assistance_directory():
+
+    commons.print_text_ascii("Carpeta de Asistencia")
+
+    path = C.RUNTIME_GROUPS_DIR 
+    system = os.name
+
+    if os.name == "nt":
+        os.startfile(path)
+    elif os.name == "posix":  # macOS and Linux
+        if "Darwin" in os.uname().sysname: # macos specific
+            os.system(f"open '{path}'")
+        else:  # linux or other POSIX systems
+            os.system(f"xdg-open '{path}'")
+    else:
+        raise OSError("Unsupported operating system")
+
+
 MENU_OPTIONS = {
     "⬇️  Descargar documento con las fichas": download_document,
     "💻  Gestionar las fichas": manage_records,
     "🧒  Gestionar estudiantes": manage_students,
     "📋  Generar asistencia": generate_assistance,
+    "📁  Abrir carpeta de asistencia": open_assistance_directory
 }
 
 def run():
